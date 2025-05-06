@@ -1,7 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
-import 'package:invoice_app/main.dart';
+import 'package:invoice_app/presentation/views/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddBusinessViewModel {
@@ -15,11 +16,11 @@ class AddBusinessViewModel {
     BuildContext context,
   ) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final businessId = firestore.collection('BUSINESSES').doc().id;
-
+    final businessId = firestore.collection('USERS').doc().id;
+    User? user = FirebaseAuth.instance.currentUser;
     // Create a map to store business data
     Map<String, dynamic> businessData = {
-      'businessId': businessId,
+      //'businessId': businessId,
       'businessName': businessName,
       'businessAddress': businessAddress,
       'businessPhone': businessPhone,
@@ -43,17 +44,16 @@ class AddBusinessViewModel {
         },
       );
 
-      // Save the business data in the BUSINESSES collection in Firestore
+      // Update the business data in the USERS collection in Firestore
       await firestore
-          .collection('BUSINESSES')
-          .doc(businessId)
-          .set(businessData)
+          .collection('USERS')
+          .doc(user!.uid)
+          .update(businessData)
           .then((_) async {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isBusinessRegistered', true);
         await prefs.setString('businessId', businessId);
         await prefs.setString('businessName', businessName);
-        
       });
       Navigator.of(context).pop();
 
@@ -67,12 +67,11 @@ class AddBusinessViewModel {
       );
     } finally {
       // Dismiss the loading dialog
-      Navigator.pushAndRemoveUntil(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MainApp(),
+          builder: (context) => HomeScreen(),
         ),
-        (route) => false,
       );
     }
   }
@@ -82,7 +81,7 @@ class AddBusinessViewModel {
 
     // Query the businessS collection where userID matches the given userId
     QuerySnapshot querySnapshot = await firestore
-        .collection('BUSINESSES')
+        .collection('USERS')
         .orderBy('timestamp', descending: true)
         .get();
 

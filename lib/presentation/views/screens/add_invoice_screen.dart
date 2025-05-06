@@ -1,14 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
+import 'package:invoice_app/core/extensions/number_formatter.dart';
 import 'package:invoice_app/presentation/components/app_button.dart';
 import 'package:invoice_app/presentation/viewmodels/add_invoice_viewmodel.dart';
 import 'package:provider/provider.dart';
 
-import '../components/app_text.dart';
-import '../components/options_picker_bottomsheet.dart';
+import '../../components/app_text.dart';
+import '../../components/options_picker_bottomsheet.dart';
 
 class AddInvoiceScreen extends StatefulWidget {
   const AddInvoiceScreen({super.key});
@@ -33,7 +35,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
   TextEditingController clientNameController = TextEditingController();
   TextEditingController clientAddressController = TextEditingController();
   TextEditingController clientPhoneController = TextEditingController();
+
   DateTime dueDate = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     final addInvoiceViewModel = Provider.of<AddInvoiceViewModel>(context);
@@ -58,13 +62,9 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
       bottomNavigationBar: AppButton(
         label: "Créer une facture",
         onTap: () {
-          // AddClientViewModel().createClient(
-          //   "1",
-          //   clientNameController.text,
-          //   clientAddressController.text,
-          //   clientPhoneController.text,
-          //   context,
-          // );
+          addInvoiceViewModel.createInvoice(
+            context,
+          );
           //Navigator.pop(context);
         },
       ),
@@ -359,7 +359,8 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                       width: double.infinity / 3,
                                       //color: Colors.blue,
                                       child: AppText(
-                                        text: "001",
+                                        //INVOICE NUMBER
+                                        text: "0001",
                                         weight: FontWeight.w500,
                                         size: 14.sp,
                                         alignment: TextAlign.end,
@@ -470,64 +471,145 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                               ),
                             ),
                             //InputField
-                            InkWell(
-                              onTap: () async {
-                                addInvoiceViewModel.selectItem(context);
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                height: 65.h,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16.r),
-                                ),
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 14.w,
-                                  vertical: 10.h,
-                                ),
-                                child: addInvoiceViewModel.clientData.isEmpty
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        spacing: 5.h,
-                                        children: [
-                                          Icon(
-                                            Icons.add_circle,
-                                            color: AppColor.btnColor,
+                            Container(
+                              width: double.infinity,
+                              //height: 65.h,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16.r),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 18.h,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (addInvoiceViewModel.items.isNotEmpty) ...{
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      padding: EdgeInsets.only(bottom: 10.h),
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount:
+                                          addInvoiceViewModel.items.length,
+                                      itemBuilder: (context, index) {
+                                        int itemPrice = addInvoiceViewModel
+                                                .items[index]['itemPrice'] ??
+                                            0;
+                                        return InkWell(
+                                          child: Slidable(
+                                            endActionPane: ActionPane(
+                                              motion:
+                                                  const DrawerMotion(), // Smooth sliding effect
+                                              children: [
+                                                SlidableAction(
+                                                  onPressed: (context) => {
+                                                    addInvoiceViewModel
+                                                        .removeItem(index),
+                                                  },
+                                                  backgroundColor: Colors.red,
+                                                  foregroundColor: Colors.white,
+                                                  icon: Icons.delete,
+                                                  label: 'Delete',
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                AppText(
+                                                  text:
+                                                      "x${addInvoiceViewModel.items[index]['itemQuantity']}",
+                                                  weight: FontWeight.w500,
+                                                  size: 16.sp,
+                                                  alignment: TextAlign.start,
+                                                ),
+                                                Flexible(
+                                                  child: Container(
+                                                    width: double.infinity,
+                                                    //height: 65.h,
+                                                    decoration: BoxDecoration(
+                                                        //color: Colors.red,
+                                                        ),
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                      horizontal: 14.w,
+                                                      vertical: 10.h,
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      // mainAxisSize:
+                                                      //     MainAxisSize.min,
+                                                      spacing: 5.h,
+                                                      children: [
+                                                        AppText(
+                                                          text:
+                                                              " ${addInvoiceViewModel.items[index]['itemName']}",
+                                                          weight:
+                                                              FontWeight.w500,
+                                                          size: 16.sp,
+                                                          alignment:
+                                                              TextAlign.start,
+                                                        ),
+                                                        AppText(
+                                                          text:
+                                                              "${itemPrice.toDotSeparated()} $selectedCurrency",
+                                                          //text: addInvoiceViewModel.items[index]['itemPrice'],
+                                                          weight:
+                                                              FontWeight.w400,
+                                                          size: 14.sp,
+                                                          alignment:
+                                                              TextAlign.start,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          AppText(
-                                            text:
-                                                "Ajouter un produit / service",
-                                            weight: FontWeight.w600,
-                                            size: 14.sp,
-                                            alignment: TextAlign.start,
-                                          ),
-                                        ],
-                                      )
-                                    : Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        spacing: 5.h,
-                                        children: [
-                                          AppText(
-                                            text: addInvoiceViewModel
-                                                    .clientData['clientName'] ??
-                                                "",
-                                            weight: FontWeight.w500,
-                                            size: 16.sp,
-                                            alignment: TextAlign.start,
-                                          ),
-                                          AppText(
-                                            text:
-                                                addInvoiceViewModel.clientData[
-                                                        'clientPhone'] ??
-                                                    "",
-                                            weight: FontWeight.w400,
-                                            size: 14.sp,
-                                            alignment: TextAlign.start,
-                                          ),
-                                        ],
-                                      ),
+                                        );
+                                      },
+                                    ),
+                                    Divider(
+                                      color: const Color.fromARGB(
+                                          36, 125, 132, 141),
+                                      thickness: 1.h,
+                                      indent: 10.h,
+                                      endIndent: 10.h,
+                                    ),
+                                    SizedBox(
+                                      height: 5.h,
+                                    ),
+                                  },
+                                  InkWell(
+                                    onTap: () async {
+                                      addInvoiceViewModel.selectItem(context);
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      spacing: 5.h,
+                                      children: [
+                                        Icon(
+                                          Icons.add_circle,
+                                          color: AppColor.btnColor,
+                                        ),
+                                        AppText(
+                                          text: "Ajouter un produit / service",
+                                          weight: FontWeight.w600,
+                                          size: 14.sp,
+                                          alignment: TextAlign.start,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
                           ],
@@ -597,14 +679,42 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                 children: [
                                   Flexible(
                                     flex: 2,
-                                    child: SizedBox(
-                                      width: double.infinity / 3,
-                                      //color: Colors.red,
-                                      child: AppText(
-                                        text: "15%",
-                                        weight: FontWeight.w500,
-                                        size: 14.sp,
-                                        alignment: TextAlign.start,
+                                    child: InkWell(
+                                      onTap: () {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(32.r),
+                                            ),
+                                          ),
+                                          backgroundColor: Colors.white,
+                                          builder: (context) {
+                                            return OptionsPickerBottomSheet(
+                                              additionalHeight: 50.h,
+                                              title: "Choisir la TVA",
+                                              options: List.generate(
+                                                101,
+                                                (index) => "$index",
+                                              ),
+                                              currentSelection: "0%",
+                                              onOptionSelected: (String value) {
+                                                addInvoiceViewModel.setTvaValue(
+                                                    int.parse(value));
+                                              },
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: SizedBox(
+                                        width: double.infinity / 3,
+                                        child: AppText(
+                                          text:
+                                              "${addInvoiceViewModel.tvaValue}%", // TVA VALUE
+                                          weight: FontWeight.w500,
+                                          size: 14.sp,
+                                          alignment: TextAlign.start,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -626,7 +736,11 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                           //width: double.infinity,
                                           //color: Colors.green,
                                           child: AppText(
-                                            text: "--", //500.000
+                                            text: addInvoiceViewModel.totalHT ==
+                                                    0
+                                                ? "--"
+                                                : (addInvoiceViewModel.totalHT)
+                                                    .toDotSeparated(), //500.000
                                             weight: FontWeight.w500,
                                             size: 14.sp,
                                             alignment: TextAlign.start,
@@ -727,7 +841,12 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                       children: [
                                         Flexible(
                                           child: AppText(
-                                            text: "--", //01 Avr 2025
+                                            text: addInvoiceViewModel
+                                                        .totalTTC ==
+                                                    0
+                                                ? "--"
+                                                : (addInvoiceViewModel.totalTTC)
+                                                    .toDotSeparated(), //TOTAL TTC
                                             weight: FontWeight.w700,
                                             size: 16.sp,
                                             alignment: TextAlign.start,

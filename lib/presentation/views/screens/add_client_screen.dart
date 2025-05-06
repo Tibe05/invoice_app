@@ -4,8 +4,8 @@ import 'package:invoice_app/presentation/components/app_button.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
 import 'package:invoice_app/presentation/viewmodels/add_client_viewmodel.dart';
 
-import '../../core/constants/app_colors.dart';
-import '../components/app_textfield.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../components/app_textfield.dart';
 
 class AddClientScreen extends StatefulWidget {
   const AddClientScreen({super.key});

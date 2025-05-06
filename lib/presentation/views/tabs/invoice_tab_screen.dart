@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
-import 'package:invoice_app/presentation/screens/add_invoice_screen.dart';
+import 'package:invoice_app/presentation/views/screens/add_invoice_screen.dart';
 import 'package:invoice_app/presentation/viewmodels/add_invoice_viewmodel.dart';
 
 class InvoiceTabScreen extends StatefulWidget {
@@ -53,7 +53,7 @@ class _InvoiceTabScreenState extends State<InvoiceTabScreen> {
               return ListView.builder(
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
-                  log("${snapshot.data![index]}");
+                  //log("${snapshot.data![index]}");
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,
@@ -80,11 +80,11 @@ class _InvoiceTabScreenState extends State<InvoiceTabScreen> {
                         ),
                         child: ListTile(
                           title: AppText(
-                            text: snapshot.data![index]['clientName'] ?? "",
+                            text: snapshot.data![index]['invoiceNumber'] ?? "",
                             size: 16.sp,
                           ),
                           subtitle: AppText(
-                            text: snapshot.data![index]['clientAddress'] ?? "",
+                            text: (snapshot.data![index]['totalTTC']).toString() ?? "",
                             size: 14.sp,
                             color: AppColor.subText,
                           ),

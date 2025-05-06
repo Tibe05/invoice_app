@@ -3,9 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:invoice_app/presentation/components/app_button.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
 import 'package:invoice_app/presentation/components/app_textfield.dart';
-import 'package:invoice_app/presentation/screens/logo_registration_screen.dart';
+import 'package:invoice_app/presentation/views/screens/logo_registration_screen.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../../core/constants/app_colors.dart';
 
 class BusinessRegistrationScreen extends StatefulWidget {
   const BusinessRegistrationScreen({super.key});

@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:invoice_app/presentation/viewmodels/add_invoice_viewmodel.dart';
+import 'package:invoice_app/presentation/viewmodels/auth_viewmodel.dart';
 import 'package:invoice_app/presentation/viewmodels/redirection_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
@@ -31,6 +32,9 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => AddInvoiceViewModel(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => AuthViewModel(),
+        ),
       ],
       child: ScreenUtilInit(
           designSize: const Size(375, 812),
@@ -48,7 +52,7 @@ class MainApp extends StatelessWidget {
               ],
               locale:
                   const Locale('fr', 'FR'), // Set the default locale to French
-              home: RedirectionViewModel(),
+              home: RedirectionViewModel(fromLoginView: false,),
             );
           }),
     );

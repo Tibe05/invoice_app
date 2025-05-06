@@ -1,20 +1,30 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
+import 'package:invoice_app/core/extensions/dialog_extensions.dart';
 import 'package:invoice_app/core/extensions/number_formatter.dart';
 import 'package:invoice_app/presentation/components/app_button.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
-import 'package:invoice_app/presentation/components/options_picker_bottomsheet.dart';
 import 'package:invoice_app/presentation/viewmodels/add_client_viewmodel.dart';
 import 'package:invoice_app/presentation/viewmodels/add_item_viewmodel.dart';
+import 'package:invoice_app/presentation/views/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddInvoiceViewModel extends ChangeNotifier {
+  //Create a TextEditingController for the item quantity typed
+  TextEditingController itemQuantityController =
+      TextEditingController(text: '1');
+
+  //Create a TextEditingController for the Item Description
+  final TextEditingController itemDescriptionController =
+      TextEditingController();
   // Client data
   Map<String, String> _clientData = {
     // 'clientId': '',
@@ -29,6 +39,33 @@ class AddInvoiceViewModel extends ChangeNotifier {
   // Issue date
   DateTime _issueDate = DateTime.now();
 
+  //TVA VALUE
+  int _tvaValue = 0;
+  int get tvaValue => _tvaValue;
+  void setTvaValue(int value) {
+    _tvaValue = value;
+    log("TVA Value set: $_tvaValue");
+    notifyListeners();
+  }
+
+  //TOTAL HORS TAXE
+  int _totalHT = 0;
+  int get totalHT => _totalHT;
+  set totalHT(int value) {
+    _totalHT = value;
+    log("Total HT set: $_totalHT");
+    notifyListeners();
+  }
+
+  //TOTAL TTC = TOTAL HT * TVA
+  int get totalTTC => _totalHT + (_totalHT * _tvaValue / 100).toInt();
+
+  // set totalTTC(int value) {
+  //   _totalHT = value;
+  //   log("Total TTC set: $_totalHT");
+  //   notifyListeners();
+  // }
+
   // Getters
   Map<String, String> get clientData => _clientData;
   List<Map<String, dynamic>> get items => _items;
@@ -36,56 +73,165 @@ class AddInvoiceViewModel extends ChangeNotifier {
 
   // Due date option
   DateTime? _dueDateOption;
-
   // Getter for due date option
   DateTime? get dueDateOption => _dueDateOption;
 
   // Setter for due date option
   void setDueDate(DateTime? dueDate) {
     _dueDateOption = dueDate;
-    print("Due date set: $_dueDateOption");
+    log("Due date set: $_dueDateOption");
     notifyListeners();
   }
 
   // Set new issue date
   void setIssueDate(DateTime date) {
     _issueDate = date;
-    print("Issue date set: $_issueDate");
+    log("Issue date set: $_issueDate");
     notifyListeners();
   }
 
   // Setters
   void setClientData(Map<String, String> clientData) {
     _clientData = clientData;
-    print("Client data set: $_clientData");
+    log("Client data set: $_clientData");
     notifyListeners();
   }
 
   // Methods for managing items
-  void addItem(String name, int quantity, double price) {
+  void addItem(String name, int quantity, int price, {String? description}) {
+    // Check if the item already exists in the list
+    for (var item in _items) {
+      if (item['itemName'] == name) {
+        // If it exists, update the quantity and price
+        item['itemQuantity'] += quantity;
+        item['itemPrice'] = price; // Update the price if needed
+        item['itemDescription'] =
+            description; // Update the description if needed
+        log("Item already exists, updated: $item");
+        notifyListeners();
+        return;
+      }
+    }
+    // If it doesn't exist, add a new item
     _items.add({
-      'name': name,
-      'quantity': quantity,
-      'price': price,
+      'itemName': name,
+      'itemQuantity': quantity,
+      'itemPrice': price,
+      'itemDescription': description, // Optional description field
     });
+    log("Selected item list (${_items.length} items): $_items");
     notifyListeners();
   }
 
-  void updateItem(int index, String name, int quantity, double price) {
+  // Update an item in the list
+  void updateItem(int index, String name, int quantity, int price) {
     if (index >= 0 && index < _items.length) {
       _items[index] = {
-        'name': name,
-        'quantity': quantity,
-        'price': price,
+        'itemName': name,
+        'itemQuantity': quantity,
+        'itemPrice': price,
       };
+      log("Selected item list after update (${_items.length} items): $_items");
       notifyListeners();
     }
   }
 
+  // Remove an item from the list
   void removeItem(int index) {
     if (index >= 0 && index < _items.length) {
       _items.removeAt(index);
+      log("Selected item list after deletion (${_items.length} items): $_items");
       notifyListeners();
+    }
+  }
+
+  //INITIALIZE INVOICE DATA FOR PDF
+  Map<String, dynamic> _invoiceDataPDF = {};
+  Map<String, dynamic> get invoiceDataPDF => _invoiceDataPDF;
+
+  //INVOICE
+  void createInvoice(BuildContext context) async {
+    try {
+      context.showLoadingDialog();
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      User? user = FirebaseAuth.instance.currentUser;
+      final invoiceId = firestore.collection('INVOICES').doc().id;
+
+      // Define invoice number
+      final invoiceNumber = prefs.getString('invoiceNumber') ?? '0001';
+      final newInvoiceNumber =
+          (int.parse(invoiceNumber) + 1).toString().padLeft(4, '0');
+      prefs.setString('invoiceNumber', newInvoiceNumber);
+
+      // Create the invoice data
+      Map<String, dynamic> invoiceData = {
+        'invoiceNumber': newInvoiceNumber,
+        'invoiceId': invoiceId,
+        //'userName': ,
+        'clientData': _clientData,
+        'items': _items,
+        'issueDate': _issueDate,
+        'dueDate': _dueDateOption,
+        'tvaValue': _tvaValue,
+        'totalHT': _totalHT,
+        'totalTTC': totalTTC,
+        'businessId': user?.uid,
+        'timestamp': FieldValue.serverTimestamp(),
+      };
+
+      // Save the invoice data to the PDF data map
+      _invoiceDataPDF = {
+        'invoiceNumber': newInvoiceNumber,
+        'clientName': _clientData['clientName'] ?? "",
+        'clientAddress': _clientData['clientAddress'] ?? "",
+        'clientPhone': _clientData['clientPhone'] ?? "",
+        'items': _items,
+        'issueDate': _issueDate.toString(),
+        'dueDate': _dueDateOption?.toString() ?? "Pas de date d'échéance",
+        'tvaValue': _tvaValue.toString(),
+        'totalHT': _totalHT.toString(),
+        'totalTTC': totalTTC.toString(),
+      };
+
+      // Add the invoice to Firestore
+      await firestore.collection('INVOICES').doc(invoiceId).set(invoiceData);
+      log("Invoice N°$newInvoiceNumber created: $invoiceData");
+      //Log the invoice pdf data
+      log("Invoice PDF data: $_invoiceDataPDF");
+      context.dismissDialog();
+      // Show a success message
+      Fluttertoast.showToast(
+        msg: "Facture N°$newInvoiceNumber créée avec succès",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: AppColor.btnColor,
+        textColor: Colors.white,
+        fontSize: 14.sp,
+      );
+      //Clear data
+      clearData();
+      // Navigate to the home screen or any other screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) =>
+              const HomeScreen(), // Replace with your home screen
+        ),
+      );
+    } catch (e, stackTrace) {
+      context.dismissDialog();
+      Fluttertoast.showToast(
+        msg: "$e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.sp,
+      );
+      // Handle any errors that occur during the invoice creation process
+      log("Error creating invoice: $e", stackTrace: stackTrace);
     }
   }
 
@@ -99,6 +245,9 @@ class AddInvoiceViewModel extends ChangeNotifier {
     };
     _items.clear();
     _issueDate = DateTime.now();
+    _tvaValue = 0;
+    _totalHT = 0;
+
     notifyListeners();
   }
 
@@ -373,6 +522,8 @@ class AddInvoiceViewModel extends ChangeNotifier {
                 ),
                 TextFormField(
                   //TODO: ADD A CONTROLLER
+                  controller: itemDescriptionController,
+
                   style: GoogleFonts.getFont(
                     "Urbanist",
                     fontSize: 14.sp,
@@ -403,10 +554,10 @@ class AddInvoiceViewModel extends ChangeNotifier {
                       ),
                     ),
                   ),
-                  onChanged: (value) {
-                    // Handle description input
-                    print("Description: $value");
-                  },
+                  // onChanged: (value) {
+                  //   // Handle description input
+                  //   print("Description: $value");
+                  // },
                 ),
               ],
             ),
@@ -415,7 +566,9 @@ class AddInvoiceViewModel extends ChangeNotifier {
             itemInformationRow(
               context,
               itemName: snapshot.data![index]['itemName'].toString(),
-              quantity: 1,
+              // quantity: itemQuantityController.text.isNotEmpty
+              //     ? int.parse(itemQuantityController.text)
+              //     : 1,
               price: itemPrice.toDouble(),
             ),
             SizedBox(height: 40.h),
@@ -426,11 +579,29 @@ class AddInvoiceViewModel extends ChangeNotifier {
                 // Add the item to the invoice
                 addItem(
                   snapshot.data![index]['itemName'],
-                  1,
-                  itemPrice.toDouble(),
+                  itemQuantityController.text.isNotEmpty
+                      ? int.parse(itemQuantityController.text)
+                      : 1,
+                  itemPrice.toInt(),
+                  description: itemDescriptionController.text,
+                  // description: snapshot.data![index]['itemDescription'],
                 );
+                //Update the total HT
+                totalHT += itemPrice.toInt() *
+                    (itemQuantityController.text.isNotEmpty
+                        ? int.parse(itemQuantityController.text)
+                        : 1);
+
+                // Reset the quantity to the default value
+
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  // Clear the text field after adding the item
+                  itemQuantityController.text = '1';
+                  itemDescriptionController.text = '';
+                });
                 // Close the bottom sheet
                 Navigator.pop(context);
+
                 Navigator.pop(context);
               },
             ),
@@ -443,18 +614,9 @@ class AddInvoiceViewModel extends ChangeNotifier {
   Widget itemInformationRow(
     BuildContext context, {
     required String itemName,
-    required int quantity,
+    //required int quantity,
     required double price,
   }) {
-    List<String> dueDateOpts = [
-      "Pas de date d'échéance",
-      "A la reception de la facture",
-      "Dans 10 jours",
-      "Dans 15 jours",
-      "Dans 30 jours",
-      "Dans 60 jours"
-    ];
-    String selectedDueDateOpt = "1";
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 5.h,
@@ -534,6 +696,7 @@ class AddInvoiceViewModel extends ChangeNotifier {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              //PRIX
               Flexible(
                 flex: 2,
                 child: SizedBox(
@@ -553,15 +716,29 @@ class AddInvoiceViewModel extends ChangeNotifier {
                 indent: 10.h,
                 endIndent: 10.h,
               ),
+              //QUANTITÉ
               Flexible(
                 flex: 2,
                 child: TextField(
                   //TODO: ADD A CONTROLLER
-                  controller: TextEditingController(text: selectedDueDateOpt),
+                  controller: itemQuantityController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
+                    TextInputFormatter.withFunction((oldValue, newValue) {
+                      if (newValue.text.isNotEmpty &&
+                          int.tryParse(newValue.text) != null) {
+                        int quantity = int.parse(newValue.text);
+                        if (quantity <= 0) {
+                          return oldValue;
+                        }
+                      }
+                      return newValue;
+                    }),
                   ],
+                  // inputFormatters: [
+                  //   FilteringTextInputFormatter.digitsOnly,
+                  // ],
                   style: GoogleFonts.getFont(
                     "Urbanist",
                     fontSize: 14.sp,
@@ -573,10 +750,10 @@ class AddInvoiceViewModel extends ChangeNotifier {
                     contentPadding: EdgeInsets.zero,
                     border: InputBorder.none,
                   ),
-                  onChanged: (value) {
-                    selectedDueDateOpt = value;
-                    print("Due date option changed: $selectedDueDateOpt");
-                  },
+                  // onChanged: (value) {
+                  //   selectedDueDateOpt = value;
+                  //   print("Due date option changed: $selectedDueDateOpt");
+                  // },
                 ),
               ),
 
@@ -607,15 +784,17 @@ class AddInvoiceViewModel extends ChangeNotifier {
     );
   }
 
+  // Stream to get the list of invoices for the current user
   Stream<List<Map<String, dynamic>>> getInvoices() async* {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final businessId = prefs.getString('businessId');
+    //final SharedPreferences prefs = await SharedPreferences.getInstance();
+    //final businessId = prefs.getString('businessId');
+    User? user = FirebaseAuth.instance.currentUser;
 
     // Stream the CLIENTS collection where userID matches the given userId
     yield* firestore
         .collection('INVOICES')
-        .where('businessId', isEqualTo: businessId)
+        .where('businessId', isEqualTo: user?.uid)
         .orderBy('timestamp', descending: true)
         .snapshots()
         .map((querySnapshot) =>

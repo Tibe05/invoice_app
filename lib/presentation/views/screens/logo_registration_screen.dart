@@ -4,7 +4,7 @@ import 'package:invoice_app/presentation/components/app_button.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
 import 'package:invoice_app/presentation/viewmodels/business_registration_viewmodel.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../../core/constants/app_colors.dart';
 
 class LogoRegistrationScreen extends StatefulWidget {
   final String businessName;
@@ -64,7 +64,7 @@ class _LogoRegistrationScreenState extends State<LogoRegistrationScreen> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 5.h,
+                  spacing: 10.h,
                   children: [
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.w),
@@ -108,7 +108,7 @@ class _LogoRegistrationScreenState extends State<LogoRegistrationScreen> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 5.h,
+                  spacing: 10.h,
                   children: [
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.w),

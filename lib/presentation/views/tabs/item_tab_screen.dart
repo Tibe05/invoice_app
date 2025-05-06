@@ -4,26 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
+import 'package:invoice_app/core/extensions/number_formatter.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
-import 'package:invoice_app/presentation/screens/add_client_screen.dart';
-import 'package:invoice_app/presentation/viewmodels/add_client_viewmodel.dart';
+import 'package:invoice_app/presentation/views/screens/add_item_screen.dart';
+import 'package:invoice_app/presentation/viewmodels/add_item_viewmodel.dart';
 
-class ClientTabScreen extends StatefulWidget {
-  const ClientTabScreen({super.key});
+class ItemTabScreen extends StatefulWidget {
+  const ItemTabScreen({super.key});
 
   @override
-  State<ClientTabScreen> createState() => _ClientTabScreenState();
+  State<ItemTabScreen> createState() => _ItemTabScreenState();
 }
 
-class _ClientTabScreenState extends State<ClientTabScreen> {
-  autoRefresher() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    setState(() {});
-  }
-
+class _ItemTabScreenState extends State<ItemTabScreen> {
   @override
   Widget build(BuildContext context) {
-    //autoRefresher();
     return Scaffold(
       backgroundColor: AppColor.bgColor,
       floatingActionButton: FloatingActionButton(
@@ -31,7 +26,7 @@ class _ClientTabScreenState extends State<ClientTabScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddClientScreen(),
+              builder: (context) => AddItemScreen(),
             ),
           );
         },
@@ -46,7 +41,7 @@ class _ClientTabScreenState extends State<ClientTabScreen> {
           setState(() {});
         },
         child: StreamBuilder(
-          stream: AddClientViewModel().getClientsByUserId(),
+          stream: AddItemViewModel().getItemsByUserId(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -60,13 +55,13 @@ class _ClientTabScreenState extends State<ClientTabScreen> {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   log("${snapshot.data![index]}");
-
+                  int itemPrice = snapshot.data![index]['itemPrice'] ?? 0;
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Slidable(
                         endActionPane: ActionPane(
-                          motion: const DrawerMotion(), // Smooth sliding effect
+                          motion: const DrawerMotion(),
                           children: [
                             SlidableAction(
                               onPressed: (context) => (),
@@ -84,20 +79,29 @@ class _ClientTabScreenState extends State<ClientTabScreen> {
                             ),
                           ],
                         ),
-                        child: ListTile(
-                          title: AppText(
-                            text: snapshot.data![index]['clientName'] ?? "",
-                            size: 16.sp,
-                          ),
-                          subtitle: AppText(
-                            text: snapshot.data![index]['clientAddress'] ?? "",
-                            size: 14.sp,
-                            color: AppColor.subText,
-                          ),
-                          trailing: AppText(
-                            text: snapshot.data![index]['clientPhone'] ?? "",
-                            size: 14.sp,
-                            color: AppColor.subText,
+                        child: InkWell(
+                          child: ListTile(
+                            title: AppText(
+                              text: snapshot.data![index]['itemName'] ?? "",
+                              size: 16.sp,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              spacing: 5.w,
+                              children: [
+                                AppText(
+                                  text: " ${itemPrice.toDotSeparated()}",
+                                  size: 14.sp,
+                                  color: AppColor.subText,
+                                ),
+                                AppText(
+                                  text: "FCFA",
+                                  size: 14.sp,
+                                  color: AppColor.subText,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -116,7 +120,7 @@ class _ClientTabScreenState extends State<ClientTabScreen> {
             } else {
               return Center(
                 child: AppText(
-                  text: "Liste des clients",
+                  text: "Liste des produits ou services",
                   size: 18.sp,
                   weight: FontWeight.w400,
                 ),

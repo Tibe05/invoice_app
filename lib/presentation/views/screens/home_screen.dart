@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
-import 'package:invoice_app/presentation/screens/add_invoice_screen.dart';
-import 'package:invoice_app/presentation/screens/tabs/client_tab_screen.dart';
-import 'package:invoice_app/presentation/screens/tabs/invoice_tab_screen.dart';
-import 'package:invoice_app/presentation/screens/tabs/item_tab_screen.dart';
-import '../../core/constants/app_colors.dart';
+import 'package:invoice_app/presentation/views/screens/add_invoice_screen.dart';
+import 'package:invoice_app/presentation/views/screens/drawer_sidebar.dart';
+import 'package:invoice_app/presentation/views/tabs/client_tab_screen.dart';
+import 'package:invoice_app/presentation/views/tabs/invoice_tab_screen.dart';
+import 'package:invoice_app/presentation/views/tabs/item_tab_screen.dart';
+import '../../../core/constants/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,12 +16,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
+        key: _scaffoldKey,
         backgroundColor: AppColor.bgColor,
+        drawer: DrawerSidebar(
+        userName: "userName",
+        userPhone: "userPhone",
+      ),
         appBar: AppBar(
           forceMaterialTransparency: true,
           centerTitle: true,
@@ -34,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
           leading: IconButton(
             icon: Icon(Icons.menu),
             onPressed: () {
+              //Open drawer
+              _scaffoldKey.currentState?.openDrawer();
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text("Menu"),
