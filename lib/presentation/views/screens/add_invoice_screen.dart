@@ -59,14 +59,21 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
           },
         ),
       ),
-      bottomNavigationBar: AppButton(
-        label: "Créer une facture",
-        onTap: () {
-          addInvoiceViewModel.createInvoice(
-            context,
-          );
-          //Navigator.pop(context);
-        },
+      bottomNavigationBar: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: AppButton(
+          label: "Créer une facture",
+          onTap: () async {
+            addInvoiceViewModel.setDueDate(dueDate, selectedDueDateOpt);
+            addInvoiceViewModel.setCurrency(selectedCurrency);
+
+            addInvoiceViewModel.createInvoice(
+              context,
+            );
+            //Navigator.pop(context);
+          },
+        ),
       ),
       body: PopScope(
         canPop: true,
@@ -182,7 +189,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                 children: [
                                   Flexible(
                                     flex: 2,
-                                    child: InkWell(
+                                    child: GestureDetector(
                                       onTap: () async {
                                         showModalBottomSheet(
                                           shape: RoundedRectangleBorder(
@@ -253,7 +260,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                   ),
                                   Flexible(
                                     flex: 2,
-                                    child: InkWell(
+                                    child: GestureDetector(
                                       onTap: () {
                                         showModalBottomSheet(
                                           context: context,
@@ -274,61 +281,72 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                                 selectedDueDateOpt,
                                             onOptionSelected: (String date) {
                                               // Handle the selected date here
-                                              setState(() {
-                                                selectedDueDateOpt = date;
-                                                if (date ==
-                                                    "Pas de date d'échéance") {
-                                                  dueDate = DateTime.now();
-                                                  selectedDueDateOpt =
-                                                      "Pas de date d'échéance";
-                                                } else if (date ==
-                                                    "A la reception de la facture") {
-                                                  dueDate = addInvoiceViewModel
-                                                      .issueDate;
-                                                  selectedDueDateOpt =
-                                                      "A la reception";
-                                                } else if (date ==
-                                                    "Dans 10 jours") {
-                                                  dueDate = addInvoiceViewModel
-                                                      .issueDate
-                                                      .add(const Duration(
-                                                          days: 10));
-                                                  selectedDueDateOpt =
-                                                      DateFormat('dd MMM yyyy',
-                                                              'fr_FR')
-                                                          .format(dueDate);
-                                                } else if (date ==
-                                                    "Dans 15 jours") {
-                                                  dueDate = addInvoiceViewModel
-                                                      .issueDate
-                                                      .add(const Duration(
-                                                          days: 15));
-                                                  selectedDueDateOpt =
-                                                      DateFormat('dd MMM yyyy',
-                                                              'fr_FR')
-                                                          .format(dueDate);
-                                                } else if (date ==
-                                                    "Dans 30 jours") {
-                                                  dueDate = addInvoiceViewModel
-                                                      .issueDate
-                                                      .add(const Duration(
-                                                          days: 30));
-                                                  selectedDueDateOpt =
-                                                      DateFormat('dd MMM yyyy',
-                                                              'fr_FR')
-                                                          .format(dueDate);
-                                                } else if (date ==
-                                                    "Dans 60 jours") {
-                                                  dueDate = addInvoiceViewModel
-                                                      .issueDate
-                                                      .add(const Duration(
-                                                          days: 60));
-                                                  selectedDueDateOpt =
-                                                      DateFormat('dd MMM yyyy',
-                                                              'fr_FR')
-                                                          .format(dueDate);
-                                                }
-                                              });
+                                              setState(
+                                                () {
+                                                  selectedDueDateOpt = date;
+                                                  if (date ==
+                                                      "Pas de date d'échéance") {
+                                                    dueDate = DateTime.now();
+                                                    selectedDueDateOpt =
+                                                        "Pas de date d'échéance";
+                                                  } else if (date ==
+                                                      "A la reception de la facture") {
+                                                    dueDate =
+                                                        addInvoiceViewModel
+                                                            .issueDate;
+                                                    selectedDueDateOpt =
+                                                        "A la reception";
+                                                  } else if (date ==
+                                                      "Dans 10 jours") {
+                                                    dueDate =
+                                                        addInvoiceViewModel
+                                                            .issueDate
+                                                            .add(const Duration(
+                                                                days: 10));
+                                                    selectedDueDateOpt =
+                                                        DateFormat(
+                                                                'dd MMM yyyy',
+                                                                'fr_FR')
+                                                            .format(dueDate);
+                                                  } else if (date ==
+                                                      "Dans 15 jours") {
+                                                    dueDate =
+                                                        addInvoiceViewModel
+                                                            .issueDate
+                                                            .add(const Duration(
+                                                                days: 15));
+                                                    selectedDueDateOpt =
+                                                        DateFormat(
+                                                                'dd MMM yyyy',
+                                                                'fr_FR')
+                                                            .format(dueDate);
+                                                  } else if (date ==
+                                                      "Dans 30 jours") {
+                                                    dueDate =
+                                                        addInvoiceViewModel
+                                                            .issueDate
+                                                            .add(const Duration(
+                                                                days: 30));
+                                                    selectedDueDateOpt =
+                                                        DateFormat(
+                                                                'dd MMM yyyy',
+                                                                'fr_FR')
+                                                            .format(dueDate);
+                                                  } else if (date ==
+                                                      "Dans 60 jours") {
+                                                    dueDate =
+                                                        addInvoiceViewModel
+                                                            .issueDate
+                                                            .add(const Duration(
+                                                                days: 60));
+                                                    selectedDueDateOpt =
+                                                        DateFormat(
+                                                                'dd MMM yyyy',
+                                                                'fr_FR')
+                                                            .format(dueDate);
+                                                  }
+                                                },
+                                              );
                                             },
                                           ),
                                         );
@@ -391,7 +409,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                               ),
                             ),
                             //InputField
-                            InkWell(
+                            GestureDetector(
                               onTap: () async {
                                 addInvoiceViewModel.selectClient(context);
                               },
@@ -497,7 +515,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                         int itemPrice = addInvoiceViewModel
                                                 .items[index]['itemPrice'] ??
                                             0;
-                                        return InkWell(
+                                        return GestureDetector(
                                           child: Slidable(
                                             endActionPane: ActionPane(
                                               motion:
@@ -585,7 +603,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                       height: 5.h,
                                     ),
                                   },
-                                  InkWell(
+                                  GestureDetector(
                                     onTap: () async {
                                       addInvoiceViewModel.selectItem(context);
                                     },
@@ -679,7 +697,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                 children: [
                                   Flexible(
                                     flex: 2,
-                                    child: InkWell(
+                                    child: GestureDetector(
                                       onTap: () {
                                         showModalBottomSheet(
                                           context: context,
@@ -746,7 +764,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                             alignment: TextAlign.start,
                                           ),
                                         ),
-                                        InkWell(
+                                        GestureDetector(
                                           onTap: () {
                                             showModalBottomSheet(
                                               context: context,
@@ -770,8 +788,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 AppText(
-                                                  text:
-                                                      selectedCurrency, //01 Avr 2025
+                                                  text: selectedCurrency, //FCFA
                                                   weight: FontWeight.w500,
                                                   size: 14.sp,
                                                   alignment: TextAlign.start,
@@ -853,7 +870,7 @@ class _AddInvoiceScreenState extends State<AddInvoiceScreen> {
                                           ),
                                         ),
                                         Flexible(
-                                          child: InkWell(
+                                          child: GestureDetector(
                                             onTap: () {
                                               showModalBottomSheet(
                                                 context: context,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
@@ -32,7 +31,7 @@ class DrawerSidebar extends StatelessWidget {
             ),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: InkWell(
+              child: GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, "/profile");
                 },

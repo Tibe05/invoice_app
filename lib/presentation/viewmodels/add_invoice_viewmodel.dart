@@ -72,13 +72,26 @@ class AddInvoiceViewModel extends ChangeNotifier {
   DateTime get issueDate => _issueDate;
 
   // Due date option
-  DateTime? _dueDateOption;
+  Map<String, dynamic>? _dueDateOption;
   // Getter for due date option
-  DateTime? get dueDateOption => _dueDateOption;
+  Map<String, dynamic>? get dueDateOption => _dueDateOption;
+
+  // Currency
+  String _currency = "FCFA"; // Default currency
+  String get currency => _currency;
+
+  void setCurrency(String selectedCurrency) {
+    _currency = selectedCurrency;
+    log("Currency set: $_currency");
+    notifyListeners();
+  }
 
   // Setter for due date option
-  void setDueDate(DateTime? dueDate) {
-    _dueDateOption = dueDate;
+  void setDueDate(DateTime? dueDate, String dateString) {
+    _dueDateOption = {
+      'date': dueDate,
+      'meaning': dateString,
+    };
     log("Due date set: $_dueDateOption");
     notifyListeners();
   }
@@ -176,6 +189,7 @@ class AddInvoiceViewModel extends ChangeNotifier {
         'tvaValue': _tvaValue,
         'totalHT': _totalHT,
         'totalTTC': totalTTC,
+        'currency': _currency,
         'businessId': user?.uid,
         'timestamp': FieldValue.serverTimestamp(),
       };
@@ -188,9 +202,10 @@ class AddInvoiceViewModel extends ChangeNotifier {
         'clientPhone': _clientData['clientPhone'] ?? "",
         'items': _items,
         'issueDate': _issueDate.toString(),
-        'dueDate': _dueDateOption?.toString() ?? "Pas de date d'échéance",
+        'dueDate': _dueDateOption?["meaning"] ?? "",
         'tvaValue': _tvaValue.toString(),
         'totalHT': _totalHT.toString(),
+        'currency': _currency,
         'totalTTC': totalTTC.toString(),
       };
 
@@ -280,7 +295,7 @@ class AddInvoiceViewModel extends ChangeNotifier {
                     return ListView.builder(
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
-                        return InkWell(
+                        return GestureDetector(
                           onTap: () {
                             Map<String, String> clientData = {
                               'clientId': snapshot.data![index]['clientId'],
@@ -385,7 +400,7 @@ class AddInvoiceViewModel extends ChangeNotifier {
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            InkWell(
+                            GestureDetector(
                               onTap: () async {
                                 showModalBottomSheet(
                                     context: context,

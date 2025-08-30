@@ -5,10 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:invoice_app/presentation/viewmodels/add_invoice_viewmodel.dart';
 import 'package:invoice_app/presentation/viewmodels/auth_viewmodel.dart';
-import 'package:invoice_app/presentation/viewmodels/redirection_viewmodel.dart';
+import 'package:invoice_app/presentation/views/screens/braingame/welcome_screen.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<void> main() async {
   await dotenv.load();
@@ -40,20 +41,20 @@ class MainApp extends StatelessWidget {
           designSize: const Size(375, 812),
           builder: (_, child) {
             return MaterialApp(
-              debugShowCheckedModeBanner: false,
-              supportedLocales: const <Locale>[
-                Locale('fr', 'FR'), // French
-                Locale('en', 'US'), // English
-              ],
-              localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              locale:
-                  const Locale('fr', 'FR'), // Set the default locale to French
-              home: RedirectionViewModel(fromLoginView: false,),
-            );
+                debugShowCheckedModeBanner: false,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'), // and other locales you support
+                  Locale('fr'),
+                ],
+                home:
+                    WelcomeScreen() //RedirectionViewModel(fromLoginView: false,),
+                );
           }),
     );
   }

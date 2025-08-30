@@ -1,9 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
+import 'package:invoice_app/core/extensions/adaptative_timestamp_formatter.dart';
+import 'package:invoice_app/core/extensions/number_formatter.dart';
 import 'package:invoice_app/presentation/components/app_text.dart';
 import 'package:invoice_app/presentation/views/screens/add_invoice_screen.dart';
 import 'package:invoice_app/presentation/viewmodels/add_invoice_viewmodel.dart';
@@ -54,7 +54,9 @@ class _InvoiceTabScreenState extends State<InvoiceTabScreen> {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   //log("${snapshot.data![index]}");
-
+                  int totalPrice = snapshot.data![index]['totalTTC'] ?? 0;
+                  String currency =
+                      snapshot.data![index]['currency'] ?? "FCFA";
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -79,19 +81,23 @@ class _InvoiceTabScreenState extends State<InvoiceTabScreen> {
                           ],
                         ),
                         child: ListTile(
+                          titleAlignment: ListTileTitleAlignment.center,
                           title: AppText(
-                            text: snapshot.data![index]['invoiceNumber'] ?? "",
+                            text:
+                                "${snapshot.data![index]['clientData']['clientName'] ?? "Client Name"} - Facture N°${snapshot.data![index]['invoiceNumber'] ?? "0001"}",
                             size: 16.sp,
                           ),
                           subtitle: AppText(
-                            text: (snapshot.data![index]['totalTTC']).toString() ?? "",
-                            size: 14.sp,
+                            text:
+                                "Date de création : ${AdaptiveTimestampFormatter.format(snapshot.data![index]['timestamp'])}",
+                            size: 13.sp,
                             color: AppColor.subText,
                           ),
                           trailing: AppText(
-                            text: snapshot.data![index]['clientPhone'] ?? "",
+                            text: "${totalPrice.toDotSeparated()} $currency",
                             size: 14.sp,
-                            color: AppColor.subText,
+                            color: AppColor.textColor,
+                            // weight: FontWeight.w600,
                           ),
                         ),
                       ),

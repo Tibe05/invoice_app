@@ -120,7 +120,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 text: "Vous avez déjà un compte ?  ",
                 size: 13.sp,
               ),
-              InkWell(
+              GestureDetector(
                 onTap: () {
                   setState(() {
                     pageSwitcher = !pageSwitcher;

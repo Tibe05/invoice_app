@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants/app_colors.dart';
 
@@ -35,14 +34,23 @@ class AppText extends StatelessWidget {
       textAlign: alignment,
       maxLines: maxLine,
       overflow: TextOverflow.ellipsis,
-      style: GoogleFonts.getFont(
-        family,
+      style: TextStyle(
+        fontFamily: family,
         height: lineHeight,
         fontSize: size,
         fontWeight: weight,
         color: color,
         decoration: underline,
       ),
+      
+      // GoogleFonts.getFont(
+      //   family,
+      //   height: lineHeight,
+      //   fontSize: size,
+      //   fontWeight: weight,
+      //   color: color,
+      //   decoration: underline,
+      // ),
 
       // TextStyle(
 

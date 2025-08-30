@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:invoice_app/core/constants/app_colors.dart';
@@ -25,16 +24,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
       appBar: AppBar(
         forceMaterialTransparency: true,
       ),
-      bottomNavigationBar: AppButton(
-        label: "Enregistrer",
-        onTap: () {
-          AddItemViewModel().createItem(
-            "1",
-            itemNameController.text,
-            int.tryParse(itemPriceController.text.replaceAll('.', '')) ?? 0,
-            context,
-          );
-        },
+      bottomNavigationBar: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: AppButton(
+          label: "Enregistrer",
+          onTap: () {
+            AddItemViewModel().createItem(
+              "1",
+              itemNameController.text,
+              int.tryParse(itemPriceController.text.replaceAll('.', '')) ?? 0,
+              context,
+            );
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: SafeArea(

@@ -25,18 +25,22 @@ class _AddClientScreenState extends State<AddClientScreen> {
       appBar: AppBar(
         forceMaterialTransparency: true,
       ),
-      bottomNavigationBar: AppButton(
-        label: "Enregistrer",
-        onTap: () {
-          AddClientViewModel().createClient(
-            "1",
-            clientNameController.text,
-            clientAddressController.text,
-            clientPhoneController.text,
-            context,
-          );
-          //Navigator.pop(context);
-        },
+      bottomNavigationBar: Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: AppButton(
+          label: "Enregistrer",
+          onTap: () {
+            AddClientViewModel().createClient(
+              "1",
+              clientNameController.text,
+              clientAddressController.text,
+              clientPhoneController.text,
+              context,
+            );
+            //Navigator.pop(context);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: SafeArea(

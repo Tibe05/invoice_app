@@ -71,7 +71,7 @@ class _LogoRegistrationScreenState extends State<LogoRegistrationScreen> {
                       child:
                           AppText(text: "Votre logo (Facultatif)", size: 14.sp),
                     ),
-                    InkWell(
+                    GestureDetector(
                       child: Container(
                         height: 228.h,
                         decoration: BoxDecoration(
@@ -115,7 +115,7 @@ class _LogoRegistrationScreenState extends State<LogoRegistrationScreen> {
                       child: AppText(
                           text: "Votre signature (Facultatif)", size: 14.sp),
                     ),
-                    InkWell(
+                    GestureDetector(
                       child: Container(
                         height: 128.h,
                         decoration: BoxDecoration(

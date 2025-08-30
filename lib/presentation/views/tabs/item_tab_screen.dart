@@ -79,7 +79,7 @@ class _ItemTabScreenState extends State<ItemTabScreen> {
                             ),
                           ],
                         ),
-                        child: InkWell(
+                        child: GestureDetector(
                           child: ListTile(
                             title: AppText(
                               text: snapshot.data![index]['itemName'] ?? "",
