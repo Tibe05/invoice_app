@@ -21,7 +21,7 @@ class AppText extends StatelessWidget {
     this.family = "Urbanist",
     this.underline = TextDecoration.none,
     this.lineHeight,
-    this.maxLine = 2,
+    this.maxLine = 50,
     this.color = AppColor.textColor,
     this.weight = FontWeight.normal,
     this.alignment = TextAlign.start,
@@ -42,7 +42,7 @@ class AppText extends StatelessWidget {
         color: color,
         decoration: underline,
       ),
-      
+
       // GoogleFonts.getFont(
       //   family,
       //   height: lineHeight,

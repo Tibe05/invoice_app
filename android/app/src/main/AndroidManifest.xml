@@ -1,6 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<uses-permission 
+    android:name="com.google.android.gms.permission.AD_ID"
+    android:value="ca-app-pub-xxxxxxxx~yyyyyyyyyy"/>
+
     <application
-        android:label="Billy"
+        android:label="Brain Memo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -25,6 +29,14 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <meta-data android:name="com.posthog.posthog.API_KEY" android:value="phc_XgHVgIgOSNC6YNh8yatNe6N8FHMPRuMWz9mldXqA7d3" />
+	    <meta-data android:name="com.posthog.posthog.POSTHOG_HOST" android:value="https://us.i.posthog.com" />
+	    <meta-data android:name="com.posthog.posthog.TRACK_APPLICATION_LIFECYCLE_EVENTS" android:value="true" />
+	    <meta-data android:name="com.posthog.posthog.DEBUG" android:value="true" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9874317708507814~2361596186"/>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

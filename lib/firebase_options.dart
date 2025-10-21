@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1083202110644',
     projectId: 'invoice-app-83ece',
     storageBucket: 'invoice-app-83ece.firebasestorage.app',
-    iosBundleId: 'com.example.invoiceApp',
+    iosBundleId: 'co.braingame.tibe',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -72,7 +72,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1083202110644',
     projectId: 'invoice-app-83ece',
     storageBucket: 'invoice-app-83ece.firebasestorage.app',
-    iosBundleId: 'com.example.invoiceApp',
+    iosBundleId: 'co.braingame.tibe',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
